@@ -100,7 +100,23 @@
 			// 图片文件名 时间 经度 纬度 高度 方向 俯仰 翻滚
 			// 加载360度图像 url 图像的地址 viewer 是viewer对象 params 是参数
 			Potree.Images360Loader.load("http://5.9.65.151/mschuetz/potree/resources/pointclouds/helimap/360/Drive2_selection", viewer, params).then(images => {
-				console.log('images', images);
+				console.log('images', images,images.images.length);
+				images.images.forEach((image, i) => {
+					// console.log('image', image);
+					let annotation = new Potree.Annotation({
+						position: image.position,
+						"cameraPosition": image.position,
+						"cameraTarget": image.position,
+						"title": i,
+					});
+					viewer.scene.annotations.add(annotation);
+					// focus
+					// 点击annotation 会触发这个事件
+					annotation.elTitle.click(() => {
+						images.focus(image);
+					});
+					
+				});
 				viewer.scene.add360Images(images);
 			});
 

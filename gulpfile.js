@@ -1,4 +1,6 @@
 
+// 我想使用 vite 来替换 gulp 构建工具
+
 const path = require('path');
 const gulp = require('gulp');
 const exec = require('child_process').exec;
@@ -81,6 +83,8 @@ gulp.task('webserver', gulp.series(async function() {
 	server = connect.server({
 		port: 1234,
 		https: false,
+		host: '0.0.0.0',
+		livereload: true
 	});
 }));
 
@@ -201,5 +205,3 @@ gulp.task('watch', gulp.parallel("build", "pack", "webserver", async function() 
 	watch(watchlist, gulp.series("build", "pack"));
 
 }));
-
-

@@ -5,16 +5,77 @@ import {Action} from "./Actions.js";
 import {Utils} from "./utils.js";
 import {EventDispatcher} from "./EventDispatcher.js";
 
+/**
+ * args 参数:
+ * position 位置
+ * title 标题
+ * description 描述
+ * cameraPosition 相机位置
+ * cameraTarget 相机目标
+ * radius 半径
+ * view 视图
+ * keepOpen 保持打开
+ * descriptionVisible 描述可见
+ * showDescription 显示描述
+ * actions 动作
+ * isHighlighted 是否突出显示
+ * _visible 是否可见
+ * __visible 是否可见
+ * _display 是否显示
+ * _expand 是否展开
+ * collapseThreshold 折叠阈值
+ * children 子注释
+ * parent 父注释
+ * boundingBox 边界框
+ * domElement 元素
+ * elTitlebar 标题栏
+ * elTitle 标题
+ * elDescription 描述
+ * elDescriptionClose 描述关闭
+ * clickTitle 点击标题
+ * actions 动作
+ * installHandles 安装句柄
+ * removeHandles 移除句柄
+ * get visible 获取可见
+ * set visible 设置可见
+ * get display 获取显示
+ * set display 设置显示
+ * get title 获取标题
+ * set title 设置标题
+ * get description 获取描述
+ * set description 设置描述
+ * add 添加注释
+ * level 级别
+ * hasChild 是否有子注释
+ * remove 移除注释
+ * removeAllChildren 移除所有子注释
+ * updateBounds 更新边界框
+ * traverse 遍历
+ * traverseDescendants 遍历子注释
+ * flatten 扁平化
+ * descendants 子注释
+ * dispose 释放
+ * toString 字符串表示
+ * setHighlighted 设置突出显示
+ * hasView 是否有视图
+ * moveHere 移动到指定位置
+ * dispose 释放
+ * toString 字符串表示
+ */
 export class Annotation extends EventDispatcher {
 	constructor (args = {}) {
 		super();
 
 		this.scene = null;
+		// 标题栏	
 		this._title = args.title || 'No Title';
+		// 描述
 		this._description = args.description || '';
+		// 偏移量
 		this.offset = new THREE.Vector3();
+		// 唯一标识
 		this.uuid = THREE.Math.generateUUID();
-
+		// 位置
 		if (!args.position) {
 			this.position = null;
 		} else if (args.position.x != null) {
@@ -22,30 +83,45 @@ export class Annotation extends EventDispatcher {
 		} else {
 			this.position = new THREE.Vector3(...args.position);
 		}
-
+		// 相机位置
 		this.cameraPosition = (args.cameraPosition instanceof Array)
 			? new THREE.Vector3().fromArray(args.cameraPosition) : args.cameraPosition;
+		// 相机目标
 		this.cameraTarget = (args.cameraTarget instanceof Array)
 			? new THREE.Vector3().fromArray(args.cameraTarget) : args.cameraTarget;
+		// 半径
 		this.radius = args.radius;
+		// 视图
 		this.view = args.view || null;
+		// 保持打开
 		this.keepOpen = false;
+		// 描述可见
 		this.descriptionVisible = false;
+		// 显示描述
 		this.showDescription = true;
+		// 动作
 		this.actions = args.actions || [];
+		// 是否突出显示
 		this.isHighlighted = false;
+		// 是否可见
 		this._visible = true;
+		// 是否可见
 		this.__visible = true;
+		// 是否显示
 		this._display = true;
+		// 是否展开
 		this._expand = false;
+		// 折叠阈值
 		this.collapseThreshold = [args.collapseThreshold, 100].find(e => e !== undefined);
-
+		// 子注释
 		this.children = [];
+		// 父注释
 		this.parent = null;
+		// 边界框
 		this.boundingBox = new THREE.Box3();
-
+		// 关闭图标
 		let iconClose = exports.resourcePath + '/icons/close.svg';
-
+		// 注释元素
 		this.domElement = $(`
 			<div class="annotation" oncontextmenu="return false;">
 				<div class="annotation-titlebar">
@@ -60,22 +136,26 @@ export class Annotation extends EventDispatcher {
 			</div>
 		`);
 
+		// 标题栏
 		this.elTitlebar = this.domElement.find('.annotation-titlebar');
+		// 标题
 		this.elTitle = this.elTitlebar.find('.annotation-label');
 		this.elTitle.append(this._title);
+		// 描述
 		this.elDescription = this.domElement.find('.annotation-description');
+		// 描述关闭
 		this.elDescriptionClose = this.elDescription.find('.annotation-description-close');
 		// this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
-
+		// 点击标题
 		this.clickTitle = () => {
 			if(this.hasView()){
 				this.moveHere(this.scene.getActiveCamera());
 			}
 			this.dispatchEvent({type: 'click', target: this});
 		};
-
+		// 点击标题
 		this.elTitle.click(this.clickTitle);
-
+		// 动作
 		this.actions = this.actions.map(a => {
 			if (a instanceof Action) {
 				return a;
@@ -83,30 +163,34 @@ export class Annotation extends EventDispatcher {
 				return new Action(a);
 			}
 		});
-
+		// 配对动作
 		for (let action of this.actions) {
 			action.pairWith(this);
 		}
-
+		// 过滤动作
 		let actions = this.actions.filter(
 			a => a.showIn === undefined || a.showIn.includes('scene'));
-
+		// 添加动作图标
 		for (let action of actions) {
 			let elButton = $(`<img src="${action.icon}" class="annotation-action-icon">`);
 			this.elTitlebar.append(elButton);
 			elButton.click(() => action.onclick({annotation: this}));
 		}
-
+		// 描述关闭悬停
 		this.elDescriptionClose.hover(
 			e => this.elDescriptionClose.css('opacity', '1'),
 			e => this.elDescriptionClose.css('opacity', '0.5')
 		);
+		// 描述关闭点击
 		this.elDescriptionClose.click(e => this.setHighlighted(false));
 		// this.elDescriptionContent.html(this._description);
 
+		// 鼠标进入事件
 		this.domElement.mouseenter(e => this.setHighlighted(true));
+		// 鼠标离开事件
 		this.domElement.mouseleave(e => this.setHighlighted(false));
 
+		// 触摸事件
 		this.domElement.on('touchstart', e => {
 			this.setHighlighted(!this.isHighlighted);
 		});
@@ -116,6 +200,10 @@ export class Annotation extends EventDispatcher {
 
 	}
 
+	/**
+	 * 安装句柄
+	 * @param {Viewer} viewer 
+	 */
 	installHandles(viewer){
 		if(this.handles !== undefined){
 			return;
@@ -130,12 +218,15 @@ export class Annotation extends EventDispatcher {
 				</svg>
 			</div>
 		`);
-		
+		// svg
 		let svg = domElement.find("svg")[0];
+		// 线
 		let elLine = domElement.find("line")[0];
+		// 开始圆
 		let elStart = domElement.find("circle")[0];
+		// 结束圆
 		let elEnd = domElement.find("circle")[1];
-
+		// 设置坐标
 		let setCoordinates = (start, end) => {
 			elStart.setAttribute("cx", `${start.x}`);
 			elStart.setAttribute("cy", `${start.y}`);
@@ -167,13 +258,14 @@ export class Annotation extends EventDispatcher {
 			domElement.css("top", `${start.y}px`);
 
 		};
-
+		// 渲染区域
 		$(viewer.renderArea).append(domElement);
 
 
 		let annotationStartPos = this.position.clone();
 		let annotationStartOffset = this.offset.clone();
 
+		// 拖拽开始
 		$(this.domElement).draggable({
 			start: (event, ui) => {
 				annotationStartPos = this.position.clone();
@@ -215,7 +307,7 @@ export class Annotation extends EventDispatcher {
 				this.offset.copy(newOffset);
 			}
 		});
-
+		// 更新回调
 		let updateCallback = () => {
 			let position = this.position;
 			let scene = viewer.scene;
@@ -252,7 +344,7 @@ export class Annotation extends EventDispatcher {
 		};
 
 		viewer.addEventListener("update", updateCallback);
-
+		// 句柄
 		this.handles = {
 			domElement: domElement,
 			setCoordinates: setCoordinates,
@@ -260,6 +352,10 @@ export class Annotation extends EventDispatcher {
 		};
 	}
 
+	/**
+	 * 移除句柄
+	 * @param {Viewer} viewer 
+	 */
 	removeHandles(viewer){
 		if(this.handles === undefined){
 			return;
@@ -272,10 +368,18 @@ export class Annotation extends EventDispatcher {
 		delete this.handles;
 	}
 
+	/**
+	 * 获取可见
+	 * @returns {boolean} 
+	 */
 	get visible () {
 		return this._visible;
 	}
 
+	/**
+	 * 设置可见
+	 * @param {boolean} value 
+	 */
 	set visible (value) {
 		if (this._visible === value) {
 			return;
@@ -374,6 +478,10 @@ export class Annotation extends EventDispatcher {
 		});
 	}
 
+	/**
+	 * 添加注释
+	 * @param {Annotation} annotation 
+	 */
 	add (annotation) {
 		if (!this.children.includes(annotation)) {
 			this.children.push(annotation);
@@ -395,6 +503,10 @@ export class Annotation extends EventDispatcher {
 		}
 	}
 
+	/**
+	 * 级别
+	 * @returns {number} 
+	 */
 	level () {
 		if (this.parent === null) {
 			return 0;
@@ -403,10 +515,19 @@ export class Annotation extends EventDispatcher {
 		}
 	}
 
+	/**
+	 * 是否有子注释
+	 * @param {Annotation} annotation 
+	 * @returns {boolean} 
+	 */
 	hasChild(annotation) {
 		return this.children.includes(annotation);
 	}
 
+	/**
+	 * 移除注释
+	 * @param {Annotation} annotation 
+	 */
 	remove (annotation) {
 		if (this.hasChild(annotation)) {
 			annotation.removeAllChildren();
@@ -416,6 +537,9 @@ export class Annotation extends EventDispatcher {
 		}
 	}
 
+	/**
+	 * 移除所有子注释
+	 */
 	removeAllChildren() {
 		this.children.forEach((child) => {
 			if (child.children.length > 0) {
@@ -426,6 +550,9 @@ export class Annotation extends EventDispatcher {
 		});
 	}
 
+	/**
+	 * 更新边界框
+	 */
 	updateBounds () {
 		let box = new THREE.Box3();
 
@@ -442,6 +569,10 @@ export class Annotation extends EventDispatcher {
 		this.boundingBox.copy(box);
 	}
 
+	/**
+	 * 遍历
+	 * @param {function} handler 
+	 */
 	traverse (handler) {
 		let expand = handler(this);
 
@@ -452,12 +583,20 @@ export class Annotation extends EventDispatcher {
 		}
 	}
 
+	/**
+	 * 遍历子注释
+	 * @param {function} handler 
+	 */
 	traverseDescendants (handler) {
 		for (let child of this.children) {
 			child.traverse(handler);
 		}
 	}
 
+	/**
+	 * 扁平化
+	 * @returns {Annotation[]} 
+	 */
 	flatten () {
 		let annotations = [];
 
@@ -468,6 +607,10 @@ export class Annotation extends EventDispatcher {
 		return annotations;
 	}
 
+	/**
+	 * 后代注释
+	 * @returns {Annotation[]} 
+	 */
 	descendants () {
 		let annotations = [];
 
@@ -480,6 +623,10 @@ export class Annotation extends EventDispatcher {
 		return annotations;
 	}
 
+	/**
+	 * 设置注释的突出显示状态
+	 * @param {boolean} highlighted 
+	 */
 	setHighlighted (highlighted) {
 		if (highlighted) {
 			this.domElement.css('opacity', '0.8');
@@ -513,6 +660,10 @@ export class Annotation extends EventDispatcher {
 		return hasView;
 	};
 
+	/**
+	 * 移动到指定位置
+	 * @param {Camera} camera 
+	 */
 	moveHere (camera) {
 		if (!this.hasView()) {
 			return;
@@ -541,13 +692,15 @@ export class Annotation extends EventDispatcher {
 			let startRadius = view.radius;
 			let endRadius = this.radius;
 
-			{ // animate camera position
+			{ 
+				// 动画相机位置
 				let tween = new TWEEN.Tween(view.position).to(endPosition, animationDuration);
 				tween.easing(easing);
 				tween.start();
 			}
 
-			{ // animate radius
+			{ 
+				// 动画半径
 				let t = {x: 0};
 
 				let tween = new TWEEN.Tween(t)
@@ -561,12 +714,19 @@ export class Annotation extends EventDispatcher {
 		}
 	};
 
+	/**
+	 * 释放
+	 */
 	dispose () {
 		if (this.domElement.parentElement) {
 			this.domElement.parentElement.removeChild(this.domElement);
 		}
 	};
 
+	/**
+	 * 字符串表示
+	 * @returns {string} 
+	 */
 	toString () {
 		return 'Annotation: ' + this._title;
 	}

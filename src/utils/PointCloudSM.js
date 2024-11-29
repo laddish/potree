@@ -60,7 +60,6 @@ export class PointCloudSM{
 	}
 
 	render(scene, camera){
-
 		this.threeRenderer.setClearColor(0x000000, 1);
 		
 		const oldTarget = this.threeRenderer.getRenderTarget();

@@ -384,6 +384,13 @@ export class Sidebar{
 			},
 		});
 
+		/**
+		 * 创建节点
+		 * @param {string} parent 父节点
+		 * @param {string} text 文本
+		 * @param {string} icon 图标
+		 * @param {Object} object 对象
+		 */
 		let createNode = (parent, text, icon, object) => {
 			let nodeID = tree.jstree('create_node', parent, { 
 					"text": text, 
@@ -613,10 +620,13 @@ export class Sidebar{
 			createNode(otherID, "animation", animationIcon, animation);
 		};
 
+		// 添加全景图像 成功 会触发这个事件
 		let onOrientedImagesAdded = (e) => {
+
 			const images = e.images;
 
 			const imagesIcon = `${Potree.resourcePath}/icons/picture.svg`;
+			// 创建全景图像节点
 			const node = createNode(imagesID, "images", imagesIcon, images);
 
 			images.addEventListener("visibility_changed", () => {
@@ -670,6 +680,7 @@ export class Sidebar{
 		this.viewer.scene.addEventListener("profile_added", onProfileAdded);
 		this.viewer.scene.addEventListener("volume_added", onVolumeAdded);
 		this.viewer.scene.addEventListener("camera_animation_added", onCameraAnimationAdded);
+		// 添加全景图像 成功 会触发这个事件
 		this.viewer.scene.addEventListener("oriented_images_added", onOrientedImagesAdded);
 		this.viewer.scene.addEventListener("360_images_added", onImages360Added);
 		this.viewer.scene.addEventListener("geopackage_added", onGeopackageAdded);

@@ -26,6 +26,9 @@ proj4.defs([
 	['EPSG:26919', '+proj=utm +zone=19 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs '],
 ]);
 
+/**
+ * 地图视图
+ */
 export class MapView{
 
 	constructor (viewer) {
@@ -90,6 +93,10 @@ export class MapView{
 		};
 	}
 
+	/**
+	 * 显示源
+	 * @param {boolean} show 
+	 */
 	showSources (show) {
 		this.sourcesLayer.setVisible(show);
 		this.sourcesLabelLayer.setVisible(show);

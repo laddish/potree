@@ -102,7 +102,9 @@ export class Volume extends THREE.Object3D {
 	}
 };
 
-
+/**
+ * 盒子体积
+ */
 export class BoxVolume extends Volume{
 
 	constructor(args = {}){
@@ -203,6 +205,9 @@ export class BoxVolume extends Volume{
 
 };
 
+/**
+ * 球体积
+ */
 export class SphereVolume extends Volume{
 
 	constructor(args = {}){

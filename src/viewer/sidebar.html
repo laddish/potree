@@ -24,14 +24,14 @@
 				<li><span data-i18n="appearance.nb_max_pts"></span>: <span id="lblPointBudget"></span> <div id="sldPointBudget"></div></li>
 				<li><span data-i18n="appearance.field_view"></span>: <span id="lblFOV"></span><div id="sldFOV"></div></li>
 
-				<div class="divider"><span>Eye-Dome-Lighting</span></div>
+				<div class="divider"><span data-i18n="tb.eye_dome_lighting"></span></div>
 
 				<li><label><input type="checkbox" id="chkEDLEnabled"/><span data-i18n="appearance.edl_enable"></span></label></li>
 				<li><span data-i18n="appearance.edl_radius"></span>: <span id="lblEDLRadius"></span><div id="sldEDLRadius"></div></li>
 				<li><span data-i18n="appearance.edl_strength"></span>: <span id="lblEDLStrength"></span><div id="sldEDLStrength"></div></li>
 				<li><span data-i18n="appearance.edl_opacity"></span>: <span id="lblEDLOpacity"></span><div id="sldEDLOpacity"></div></li>
 				
-				<div class="divider"><span>Background</span></div>
+				<div class="divider"><span data-i18n="tb.background"></span></div>
 
 				<li>
 					<selectgroup id="background_options">
@@ -43,12 +43,16 @@
 					</selectgroup>
 				</li>
 
-				<div class="divider"><span>Other</span></div>
+				<div class="divider"><span data-i18n="tb.other"></span></div>
 
 				<li>
 					<selectgroup id="splat_quality_options">
-						<option id="splat_quality_options_standard" value="standard">Standard</option>
-						<option id="splat_quality_options_hq" value="hq">High Quality</option>
+						<option id="splat_quality_options_standard" value="standard"
+							data-i18n="splat_quality_options.standard"
+						>Standard</option>
+						<option id="splat_quality_options_hq" value="hq"
+							data-i18n="splat_quality_options.hq"
+						>High Quality</option>
 					</selectgroup>
 				</li>
 				
@@ -63,7 +67,7 @@
 		<h3 id="menu_tools"><span data-i18n="tb.tools_opt"></span></h3>
 		<div class="pv-menu-list">
 
-			<div class="divider"><span>Measurement</span></div>
+			<div class="divider"><span data-i18n="tb.measurement"></span></div>
 
 			<li id="tools"></li>
 

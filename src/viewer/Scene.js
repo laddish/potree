@@ -13,9 +13,11 @@ export class Scene extends EventDispatcher{
 		super();
 
 		this.annotations = new Annotation();
-		
+		// 场景
 		this.scene = new THREE.Scene();
+		// 背景场景
 		this.sceneBG = new THREE.Scene();
+		// 点云场景
 		this.scenePointCloud = new THREE.Scene();
 
 		this.cameraP = new THREE.PerspectiveCamera(this.fov, 1, 0.1, 1000*1000);
@@ -163,8 +165,10 @@ export class Scene extends EventDispatcher{
 		}
 	};
 
+	// 添加全景图像
 	add360Images(images){
 		this.images360.push(images);
+		// node 是包含很多Mesh的节点
 		this.scene.add(images.node);
 
 		this.dispatchEvent({
@@ -174,6 +178,7 @@ export class Scene extends EventDispatcher{
 		});
 	}
 
+	// 移除全景图像
 	remove360Images(images){
 		let index = this.images360.indexOf(images);
 		if (index > -1) {

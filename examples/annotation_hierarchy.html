@@ -82,7 +82,7 @@
 		potreeViewer.setDescription("");
 		
 		potreeViewer.loadGUI(() => {
-			potreeViewer.setLanguage('en');
+			potreeViewer.setLanguage('zh');
 			$("#menu_appearance").next().show();
 			$("#menu_tools").next().show();
 			$("#menu_scene").next().show();
@@ -114,6 +114,7 @@
 			{ // ANNOTATIONS
 				let aRoot = potreeViewer.scene.annotations;
 
+				// 根注释
 				let aCA13 = new Potree.Annotation({
 					title: "CA13",
 					position: [675036.45, 3850315.78, 65076.70],
@@ -122,6 +123,7 @@
 				});
 				aRoot.add(aCA13);
 
+				// 子注释
 				let aSanSimeon = new Potree.Annotation({
 					title: "San Simeon",
 					position: [664147.50, 3946008.73, 16.30],
@@ -130,6 +132,7 @@
 				});
 				aCA13.add(aSanSimeon);
 
+				// 子注释
 				let aHearstCastle = new Potree.Annotation({
 					title: "Hearst Castle",
 					position: [665744.56, 3950567.52, 500.48],
@@ -138,6 +141,7 @@
 				});
 				aCA13.add(aHearstCastle);
 
+				// 子注释
 				let aMorroBay = new Potree.Annotation({
 					title: "Morro Bay",
 					position: [695483.33, 3916430.09, 25.75],
@@ -234,6 +238,7 @@
 				aRoot.add(aTreeReturns);
 				aTreeReturns.domElement.find(".annotation-action-icon:first").css("filter", "invert(1)");
 
+				// 盒子体积
 				let volume = new Potree.BoxVolume();
 				volume.position.set(675755.4039368022, 3937586.911614576, 85);
 				volume.scale.set(119.87189835418388, 68.3925257233834, 51.757483718373265);
@@ -250,9 +255,9 @@
 
 		function loop(timestamp){
 			requestAnimationFrame(loop);
-
+			// 更新
 			potreeViewer.update(potreeViewer.clock.getDelta(), timestamp);
-
+			// 渲染
 			potreeViewer.render();
 
 			if(window.toMap !== undefined){
@@ -284,6 +289,7 @@
 					cDir = Cesium.Cartesian3.normalize(cDir, new Cesium.Cartesian3());
 					cUp = Cesium.Cartesian3.normalize(cUp, new Cesium.Cartesian3());
 
+					// 设置视图
 					cesiumViewer.camera.setView({
 						destination : cPos,
 						orientation : {
@@ -294,6 +300,7 @@
 					
 				}
 
+				// 设置视图
 				let aspect = potreeViewer.scene.getActiveCamera().aspect;
 				if(aspect < 1){
 					let fovy = Math.PI * (potreeViewer.scene.getActiveCamera().fov / 180);
@@ -309,6 +316,7 @@
 			cesiumViewer.render();
 		}
 
+		
 		requestAnimationFrame(loop);
 
 

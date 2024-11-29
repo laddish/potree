@@ -128,6 +128,13 @@ let resourcePath = scriptPath + '/resources';
 export {scriptPath, resourcePath};
 
 
+/**
+ * 加载点云
+ * @param {*} path 点云的地址
+ * @param {*} name 点云的名称
+ * @param {*} callback 回调函数
+ * @returns 
+ */
 export function loadPointCloud(path, name, callback){
 	let loaded = function(e){
 		e.pointcloud.name = name;
@@ -139,7 +146,10 @@ export function loadPointCloud(path, name, callback){
 		// load pointcloud
 		if (!path){
 			// TODO: callback? comment? Hello? Bueller? Anyone?
+			resolve({type: 'loading_failed'});
+			return;
 		} else if (path.includes('ept.json')) {
+			// 加载ept.json 文件
 			EptLoader.load(path, function(geometry) {
 				if (!geometry) {
 					console.error(new Error(`failed to load point cloud from URL: ${path}`));
@@ -150,6 +160,7 @@ export function loadPointCloud(path, name, callback){
 				}
 			});
 		} else if (path.includes('.copc.laz')) {
+			// 加载 copc.laz 文件
 			CopcLoader.load(path, function(geometry) {
 				if (!geometry) {
 					console.error(new Error(`failed to load point cloud from URL: ${path}`));
@@ -160,6 +171,7 @@ export function loadPointCloud(path, name, callback){
 				}
 			});
 		} else if (path.indexOf('cloud.js') > 0) {
+			// 加载 cloud.js 文件
 			POCLoader.load(path, function (geometry) {
 				if (!geometry) {
 					//callback({type: 'loading_failed'});

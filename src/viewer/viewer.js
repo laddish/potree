@@ -295,18 +295,29 @@ export class Viewer extends EventDispatcher{
 
 		{ // set defaults
 			this.setFOV(60);
+			// 人眼视觉感知
 			this.setEDLEnabled(false);
+			// 人眼视觉感知半径	
 			this.setEDLRadius(1.4);
+			// 人眼视觉感知强度
 			this.setEDLStrength(0.4);
+			// 人眼视觉感知透明度
 			this.setEDLOpacity(1.0);
+			// 裁剪任务
 			this.setClipTask(ClipTask.HIGHLIGHT);
+			// 裁剪方法
 			this.setClipMethod(ClipMethod.INSIDE_ANY);
+			// 点预算
 			this.setPointBudget(1*1000*1000);
+			// 显示边界框
 			this.setShowBoundingBox(false);
+			// 冻结
 			this.setFreeze(false);
+			// 控制
 			this.setControls(this.orbitControls);
+			// 背景
 			this.setBackground('gradient');
-
+			// 缩放因子	
 			this.scaleFactor = 1;
 
 			this.loadSettingsFromURL();
@@ -1880,6 +1891,7 @@ export class Viewer extends EventDispatcher{
 			}
 		}
 
+		// 更新 TWEEN 动画
 		TWEEN.update(timestamp);
 
 		this.dispatchEvent({
@@ -2079,6 +2091,7 @@ export class Viewer extends EventDispatcher{
 	}
 
 	renderDefault(){
+
 		let pRenderer = this.getPRenderer();
 
 		{ // resize
@@ -2108,7 +2121,11 @@ export class Viewer extends EventDispatcher{
 
 		pRenderer.clear();
 
+		// 更新 TWEEN 动画
+		TWEEN.update();
+		// 渲染主场景
 		pRenderer.render(this.renderer);
+		// 渲染覆盖层
 		this.renderer.render(this.overlay, this.overlayCamera);
 	}
 	
