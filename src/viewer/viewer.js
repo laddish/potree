@@ -1905,23 +1905,36 @@ export class Viewer extends EventDispatcher{
 		}
 	}
 
+	// 该函数实现了懒加载模式 - 渲染器只在首次需要时创建，然后缓存以供后续使用。这有助于提高性能和资源管理。
+	// 渲染管线支持三种主要模式：
+	// 带可选EDL的高质量渲染
+	// 带EDL的标准渲染
+	// 使用默认PotreeRenderer的基础渲染
+	// 渲染器的选择会影响点云的可视化效果，不同的渲染器提供不同的质量级别和视觉效果。特别是EDL功能可以帮助改善点云可视化中的深度感知。
 	getPRenderer(){
+		// 当启用高质量渲染（useHQ为true）时，创建并返回HQSplatRenderer
+		// EDL（Eye-Dome-Lighting）设置会传递给高质量渲染器
 		if(this.useHQ){
 			if (!this.hqRenderer) {
+				// 高质量渲染器（HQSplatRenderer）
 				this.hqRenderer = new HQSplatRenderer(this);
 			}
 			this.hqRenderer.useEDL = this.useEDL;
 
 			return this.hqRenderer;
 		}else{
+			// 如果没有启用高质量渲染，但启用了EDL且硬件支持，则创建并返回EDLRenderer
 			if (this.useEDL && Features.SHADER_EDL.isSupported()) {
 				if (!this.edlRenderer) {
+					// EDL渲染器通过后处理提供增强的深度感知
 					this.edlRenderer = new EDLRenderer(this);
 				}
 
 				return this.edlRenderer;
 			} else {
+				// 如果既没有启用高质量渲染也没有启用EDL，则使用标准的PotreeRenderer
 				if (!this.potreeRenderer) {
+					// Potree渲染器
 					this.potreeRenderer = new PotreeRenderer(this);
 				}
 
@@ -2090,20 +2103,40 @@ export class Viewer extends EventDispatcher{
 
 	}
 
+	/* 渲染流程的主要步骤：
+	检查是否为VR模式，选择对应的渲染方式
+	获取适当的渲染器（高质量/EDL/标准)}
+	更新视口和相机参数
+	更新动画状态
+	渲染主场景
+	渲染UI覆盖层 
+	这个渲染系统的设计考虑了：
+	VR支持
+	多种渲染质量选项
+	性能监控
+	错误处理
+	自适应视口
+	UI层的独立渲染
+	整个系统采用了分层的架构，使得不同的渲染需求（VR/非VR，高质量/标准等）能够灵活切换和扩展。
+	
+	*/
 	renderDefault(){
+	// 实现了标准渲染流程
 
 		let pRenderer = this.getPRenderer();
-
+ 		// 处理视口大小调整
 		{ // resize
 			const width = this.scaleFactor * this.renderArea.clientWidth;
 			const height = this.scaleFactor * this.renderArea.clientHeight;
-
+			// 设置渲染器尺寸
 			this.renderer.setSize(width, height);
 			const pixelRatio = this.renderer.getPixelRatio();
 			const aspect = width / height;
 
+			// 更新透视相机参数
 			const scene = this.scene;
 
+			// 更新正交相机参数
 			scene.cameraP.aspect = aspect;
 			scene.cameraP.updateProjectionMatrix();
 
@@ -2114,38 +2147,44 @@ export class Viewer extends EventDispatcher{
 			scene.cameraO.bottom = -frustumScale * 1 / aspect;
 			scene.cameraO.updateProjectionMatrix();
 
+			// 更新屏幕空间相机参数
 			scene.cameraScreenSpace.top = 1/aspect;
 			scene.cameraScreenSpace.bottom = -1/aspect;
 			scene.cameraScreenSpace.updateProjectionMatrix();
 		}
 
+		// 清除渲染器
 		pRenderer.clear();
 
-		// 更新 TWEEN 动画
+		// 更新动画
 		TWEEN.update();
 		// 渲染主场景
 		pRenderer.render(this.renderer);
-		// 渲染覆盖层
+		// 渲染UI覆盖层
 		this.renderer.render(this.overlay, this.overlayCamera);
 	}
 	
 	render(){
+	    // 如果启用了性能测量，标记渲染开始时间
 		if(Potree.measureTimings) performance.mark("render-start");
 
 		try{
-
+        // 检查是否处于VR模式
 			const vrActive = this.renderer.xr.isPresenting;
 
 			if(vrActive){
+				// VR模式渲染
 				this.renderVR();
 			}else{
+				// 默认模式渲染
 				this.renderDefault();
 			}
 
 		}catch(e){
+			// 错误处理
 			this.onCrash(e);
 		}
-		
+		// 如果启用了性能测量，记录渲染耗时
 		if(Potree.measureTimings){
 			performance.mark("render-end");
 			performance.measure("render", "render-start", "render-end");
